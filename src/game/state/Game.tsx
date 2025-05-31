@@ -1,17 +1,33 @@
 'use client'
 
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useGameState} from "@/game/state/GameStateProvider";
+import {GameRules} from "@/game/rules/GameRules";
+import GameRulesMenu from "@/components/GameRulesMenu";
 
 export default function Game() {
     const {
         board,
-        elapsedTime,
         isRunning,
         startGame,
-        stopGame,
-        changeDirection
+        changeDirection,
+        startGameWithRules,
     } = useGameState();
+
+    const [showMenu, setShowMenu] = useState(true);
+
+    const handleStart = (rules: GameRules) => {
+        if (startGameWithRules) {
+            startGameWithRules(rules);
+        } else {
+            startGame();
+        }
+        setShowMenu(false);
+    };
+    const openMenu = () => {
+        setShowMenu(true);
+    }
+
 
     useEffect(() => {
         const handleKeyPress = (e: KeyboardEvent) => {
@@ -34,21 +50,38 @@ export default function Game() {
         return () => window.removeEventListener('keydown', handleKeyPress);
     }, [isRunning, changeDirection]);
 
+    if (showMenu) {
+        return (
+
+            <div className="container py-5">
+                <GameRulesMenu onStart={handleStart} />
+            </div>
+        );
+    }
 
     return (
         <div className="container-fluid bg-dark text-white min-vh-100 d-flex flex-column align-items-center pt-4 fixed-position">
             <div className="mb-4">
                 {!isRunning && (
-                    <button
-                        onClick={startGame}
-                        className="btn btn-success px-4 py-2"
-                    >
-                        Start Game
-                    </button>
+                    <div>
+                        <button
+                            onClick={startGame}
+                            className="btn btn-success px-4 py-2"
+                        >
+                            Start Game
+                        </button>
+                        <button
+                            onClick={openMenu}
+                            className="btn btn-success px-4 py-2 ml-4"
+                        >
+                            Open Menu
+                        </button>
+                    </div>
+
                 )}
                 {isRunning && (
                     <div className="mb-4">
-                        <p>Point Currently: { board?.player.points }</p>
+                        <p>Point Currently: {board?.player.points}</p>
                     </div>
                 )}
             </div>

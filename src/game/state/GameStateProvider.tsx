@@ -27,6 +27,12 @@ export const GameStateProvider = ({ children }: { children: React.ReactNode }) =
     const animationRef = useRef<number | null>(null)
     const timeRef = useRef<NodeJS.Timeout | null>(null)
 
+    const startGameWithRules = (customRules: GameRules) => {
+        rules.board = customRules.board;
+        rules.player = customRules.player;
+        startGame();
+    }
+
     const startGame = () => {
         stopGame() // Stop any existing game
 
@@ -42,7 +48,6 @@ export const GameStateProvider = ({ children }: { children: React.ReactNode }) =
         let lastStepTime = performance.now();
 
         /* Modifier declarations */
-        let modifierUntil = 0;
         const boostDuration = rules.player.speedBoostDuration * 1000;
         const invincibilityDuration = rules.player.invincibilityDuration * 1000;
         //store modifier
@@ -71,7 +76,6 @@ export const GameStateProvider = ({ children }: { children: React.ReactNode }) =
             const isModifierActive = currentModifier && now < currentModifier.until;
             const modifierType = isModifierActive ? currentModifier!.typeName : null;
 
-            modifierUntil = now + boostDuration;
             let effectiveSpeed = speed;
             if (modifierType === "speedBoost") {
                 effectiveSpeed = speed * boostMultiplier;
@@ -95,6 +99,7 @@ export const GameStateProvider = ({ children }: { children: React.ReactNode }) =
                             rules.board.height
                         );
                         changeDirection(newDir);
+                        lastStepTime = now;
                     } else {
                         console.log("game stopped")
                         stopGame();
@@ -173,6 +178,7 @@ export const GameStateProvider = ({ children }: { children: React.ReactNode }) =
         stopGame,
         startGame,
         changeDirection,
+        startGameWithRules
     }
 
     return <GameStateContext.Provider value={value}>{children}</GameStateContext.Provider>
